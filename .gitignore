@@ -1,0 +1,51 @@
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.iml
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+.env.*
+*.pem
+*.key
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# =========================
+# Flutter / Dart
+# =========================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+
+# =========================
+# Logs & Temp
+# =========================
+*.log
+*.sqlite3
+*.db
+
+# =========================
+# Node (if any)
+# =========================
+node_modules/

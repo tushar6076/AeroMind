@@ -1,0 +1,40 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# =========================
+# Environment
+# =========================
+.env
+.env.*
+
+# =========================
+# Database
+# =========================
+*.sqlite3
+*.db
+
+# =========================
+# Logs / AI / Cache
+# =========================
+*.log
+.google_auth_cache/
+vector_store/
+nltk_data/
+
+# =========================
+# Docker / OS / IDE
+# =========================
+.dockerignore
+docker-compose.override.yml
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
