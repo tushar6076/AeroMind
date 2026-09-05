@@ -18,21 +18,21 @@ class ApiEndpoints {
     }
 
     if (kIsWeb) {
-      return 'localhost:8000';
+      return 'localhost:8100';
     }
 
     if (Platform.isAndroid) {
       // Android Emulator -> host machine localhost
-      return '10.0.2.2:8000';
+      return '10.0.2.2:8100';
     }
 
     if (Platform.isIOS) {
       // iOS Simulator -> host machine localhost
-      return 'localhost:8000';
+      return 'localhost:8100';
     }
 
     // macOS / desktop development
-    return '127.0.0.1:8000';
+    return '127.0.0.1:8100';
   }
 
   /// API protocol.
