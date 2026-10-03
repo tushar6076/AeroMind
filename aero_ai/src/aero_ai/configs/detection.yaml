@@ -1,0 +1,40 @@
+data:
+  train_images: data/raw/images/train
+  train_annotations: data/raw/annotations/train.json
+  val_images: data/raw/images/val
+  val_annotations: data/raw/annotations/val.json
+
+model:
+  classes:
+    - person
+    - vehicle
+    - animal
+  pretrained: true
+  trainable_backbone_layers: 3
+  min_size: 640
+  max_size: 1024
+  anchor_sizes: [16, 32, 64, 128, 256]
+  aspect_ratios: [0.5, 1.0, 2.0]
+
+training:
+  output_dir: artifacts
+  epochs: 30
+  batch_size: 2
+  num_workers: 2
+  learning_rate: 0.005
+  momentum: 0.9
+  weight_decay: 0.0005
+  step_size: 10
+  gamma: 0.1
+  score_threshold: 0.25
+  seed: 42
+  horizontal_flip_probability: 0.5
+
+evaluation:
+  iou_thresholds: [0.5, 0.75]
+  score_threshold: 0.25
+
+export:
+  input_size: 640
+  opset: 17
+  max_detections: 100
