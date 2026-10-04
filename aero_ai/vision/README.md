@@ -1,0 +1,134 @@
+# ResQVision Aerial Object Detection
+
+`aero_ai` is the standalone data-validation, training, evaluation, inference, and
+ONNX-export project for ResQVision aerial imagery. It trains a Faster R-CNN
+ResNet-50 FPN detector for three configured categories: `person`, `vehicle`,
+and `animal`. This project replaces the previously copied face-embedding
+workflow; it does not perform face recognition or identify individuals.
+
+The AI project is not part of the FastAPI container. Model artifacts are not
+automatically deployed to `aero_cloud` or `aero_app`.
+
+## Project structure
+
+| Path | Responsibility |
+| --- | --- |
+| `src/aero_vision_ai/configs/detection.yaml` | Packaged default dataset paths, class names, model settings, training options, evaluation thresholds, and export settings. |
+| `src/aero_vision_ai/config.py` | Typed configuration records, path resolution, and settings validation. |
+| `src/aero_vision_ai/data/` | COCO dataset loading, safe image-path checks, box validation, augmentation, and dataset reports. |
+| `src/aero_vision_ai/models/` | Faster R-CNN construction and class-head configuration. |
+| `src/aero_vision_ai/engine/` | Training loop, checkpoint selection, and detection metrics. |
+| `src/aero_vision_ai/utils/` | Checkpoint persistence and compatibility checks. |
+| `src/aero_vision_ai/inference.py` | Single-image prediction and model loading. |
+| `src/aero_vision_ai/deployment/` | ONNX export and export metadata. |
+| `src/aero_vision_ai/cli.py` | `aero-ai` command-line interface. |
+| `tests/` | Focused tests for configuration, COCO data handling, augmentation, and evaluation metrics. |
+
+Dataset and output directories are runtime inputs/outputs, not source-code
+folders: the default `data/raw/` paths are read from the config, while the
+`artifacts/` output directory is created when training or exporting.
+
+## Environment setup
+
+Use Python 3.10 or newer. From this directory:
+
+```sh
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+```
+
+For GPU training, install a PyTorch and Torchvision build compatible with the
+target CUDA version by following the official PyTorch installation selector,
+then install the remaining project dependencies. On Apple Silicon, the project
+can use PyTorch's MPS backend when available; otherwise it uses CPU.
+
+## Dataset format
+
+Place the dataset files at the paths configured in the packaged
+`src/aero_vision_ai/configs/detection.yaml`:
+
+```text
+data/raw/
+├── images/
+│   ├── train/
+│   └── val/
+└── annotations/
+    ├── train.json
+    └── val.json
+```
+
+Each JSON file follows the COCO object-detection shape and contains `images`,
+`categories`, and `annotations` arrays:
+
+```json
+{
+  "images": [
+    {"id": 1, "file_name": "frame_0001.jpg", "width": 1920, "height": 1080}
+  ],
+  "categories": [
+    {"id": 1, "name": "person"},
+    {"id": 2, "name": "vehicle"},
+    {"id": 3, "name": "animal"}
+  ],
+  "annotations": [
+    {
+      "id": 1,
+      "image_id": 1,
+      "category_id": 1,
+      "bbox": [120, 80, 36, 72],
+      "area": 2592,
+      "iscrowd": 0
+    }
+  ]
+}
+```
+
+Bounding boxes use COCO `[x, y, width, height]` pixel coordinates. Category
+names must exactly match the configured classes. Dataset category IDs may be
+any unique integers; the loader maps them to model labels starting at 1.
+Images with no objects are supported. Keep training and validation imagery
+separate, use consistent annotation practices, and ensure you have permission
+to use the images. Do not commit private imagery or generated model binaries.
+
+Edit the `data.*` paths in `src/aero_vision_ai/configs/detection.yaml` when
+using another dataset layout. Relative paths are resolved from the directory
+where you run the `aero-ai` command. You can also pass `--config` with your own
+YAML file; its relative dataset paths use the same working-directory rule.
+
+## Workflow
+
+Run from `aero_ai/` after installing the environment and placing the dataset:
+
+```sh
+aero-ai validate
+aero-ai train
+aero-ai evaluate --checkpoint artifacts/best.pt --output artifacts/evaluation.json
+aero-ai predict --image data/raw/images/val/frame_0001.jpg \
+  --checkpoint artifacts/best.pt --output artifacts/prediction.json
+aero-ai export --checkpoint artifacts/best.pt
+```
+
+All commands accept `--config path/to/detection.yaml`; the default YAML is
+included in the installed Python package. No root-level `configs/`,
+`scripts/`, `data/`, `models/`, or `artifacts/` scaffolding needs to be checked
+into the repository. Supply the dataset locally; generated output directories
+are created as needed.
+
+Training writes `artifacts/best.pt` and `artifacts/last.pt`. Evaluation reports
+per-class AP, mAP over configured IoU thresholds, precision, recall, and F1.
+Prediction JSON contains class names, confidence scores, and `xyxy` pixel
+coordinates. ONNX export writes `artifacts/aero_detector.onnx` and a JSON
+metadata sidecar. Pretrained weights may be downloaded by Torchvision when
+`model.pretrained` is enabled; disable it in the YAML config for offline
+training or when those weights are unavailable.
+
+Run the focused test suite with:
+
+```sh
+pytest
+```
+
+Validate model quality and confidence thresholds on representative aerial
+validation data before using predictions in operational workflows.

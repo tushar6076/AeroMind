@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     @property
     def ASYNC_DATABASE_URL(self) -> str:
         """Convert DATABASE_URL to asyncpg format"""
-        if self.DATABASE_URL.startswith("postgresql://"):
-            return self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if self.DATABASE_URL.startswith("postgaerol://"):
+            return self.DATABASE_URL.replace("postgaerol://", "postgaerol+asyncpg://", 1)
         return self.DATABASE_URL
 
     # ======================

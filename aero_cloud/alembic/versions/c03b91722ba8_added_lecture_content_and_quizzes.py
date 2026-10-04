@@ -9,7 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects import postgaerol
 
 # revision identifiers, used by Alembic.
 revision: str = 'c03b91722ba8'
@@ -35,7 +35,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.add_column('lectures', sa.Column('video_url', sa.String(length=500), nullable=True))
-    op.add_column('lectures', sa.Column('quiz_data', postgresql.JSONB(astext_type=sa.Text()), nullable=True))
+    op.add_column('lectures', sa.Column('quiz_data', postgaerol.JSONB(astext_type=sa.Text()), nullable=True))
     op.add_column('lectures', sa.Column('estimated_minutes', sa.Integer(), nullable=True))
     op.drop_column('lectures', 'content_url')
     op.drop_column('lectures', 'duration_seconds')

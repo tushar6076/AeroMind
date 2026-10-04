@@ -1,0 +1,2 @@
+[console_scripts]
+vision = aero_vision_ai.cli:main

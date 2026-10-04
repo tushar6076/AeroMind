@@ -1,0 +1,44 @@
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  features:
+    - roll
+    - pitch
+    - yaw_rate
+    - accel_x
+    - accel_y
+    - accel_z
+    - gyro_x
+    - gyro_y
+    - gyro_z
+    - vbat_sag
+    - current_draw
+    - alt_baro
+  window_size: 16
+  stride: 4
+  val_split: 0.2
+
+model:
+  architecture: safety_mlp
+  input_dim: 12
+  hidden_dims: [64, 32, 16]
+  num_classes: 4
+  classes:
+    - nominal
+    - motor_imbalance
+    - battery_critical
+    - unstable_oscillation
+  dropout: 0.1
+
+training:
+  output_dir: checkpoints
+  epochs: 40
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  seed: 42
+
+export:
+  target_format: tflite_int8
+  c_array_name: g_safety_model_data
+  quantize_calibration_samples: 200

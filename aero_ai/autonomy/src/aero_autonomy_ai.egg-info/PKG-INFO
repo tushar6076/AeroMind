@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: aero-autonomy-ai
+Version: 0.1.0
+Summary: ResQVision Level 1 flight safety and telemetry anomaly engine.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: torch>=2.0.0
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: tqdm>=4.65.0
+Requires-Dist: onnx>=1.14.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.3.0; extra == "dev"

@@ -1,0 +1,2 @@
+[console_scripts]
+autonomy = aero_autonomy_ai.cli:main

@@ -1,14 +1,26 @@
-/data/raw/images/train/*
-!/data/raw/images/train/.gitkeep
-/data/raw/images/val/*
-!/data/raw/images/val/.gitkeep
-/data/raw/annotations/*.json
-.venv/
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.iml
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+*.pem
+*.key
+
+# =========================
+# Python
+# =========================
 __pycache__/
 *.py[cod]
-
-/artifacts/*
-!/artifacts/.gitkeep
-*.onnx
-*.pth
-*.pt
+*$py.class
+.venv/
+venv/
+ENV/
