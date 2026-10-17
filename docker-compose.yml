@@ -10,9 +10,8 @@ services:
       PORT: 8100
       DEBUG: "false"
       ENVIRONMENT: production
-      WORKERS_COUNT: 1
     ports:
-      - "127.0.0.1:8100:8100"
+      - "8100:8100"
     healthcheck:
       test:
         - CMD
@@ -23,32 +22,4 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 3
-    restart: unless-stopped
-
-  worker:
-    build:
-      context: ./aero_cloud
-      dockerfile: Dockerfile
-    env_file:
-      - ./aero_cloud/.env
-    command:
-      - celery
-      - -A
-      - app.workers.celery_app:celery_app
-      - worker
-      - --loglevel=INFO
-      - --concurrency=1
-    restart: unless-stopped
-
-  cloudflared:
-    image: cloudflare/cloudflared:2026.8.3
-    command:
-      - tunnel
-      - --no-autoupdate
-      - run
-      - --token
-      - ${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN in the root .env file}
-    depends_on:
-      api:
-        condition: service_healthy
     restart: unless-stopped

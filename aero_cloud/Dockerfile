@@ -6,8 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HOST=0.0.0.0 \
     PORT=8100 \
     DEBUG=false \
-    ENVIRONMENT=production \
-    WORKERS_COUNT=1
+    ENVIRONMENT=production
 
 WORKDIR /app
 

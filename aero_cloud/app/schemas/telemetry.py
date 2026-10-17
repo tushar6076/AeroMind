@@ -1,32 +1,19 @@
 from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
 
 
-class TelemetryData(BaseModel):
-    battery: Optional[float] = None
-    altitude: Optional[float] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    speed: Optional[float] = None
-    rain: Optional[bool] = None
-    lidar: Optional[float] = None
-    ultrasonic: Optional[float] = None
-    flight_mode: Optional[str] = None
-    signal: Optional[float] = None
-    timestamp: Optional[datetime] = None
-
-class SDPPayload(BaseModel):
-    sdp: str
-    type: str  # "offer" or "answer"
-    target: Optional[str] = "drone"  # "drone" or user_id
+class TelemetrySnapshot(BaseModel):
+    timestamp: float
+    link_quality: int | None = None
+    battery_voltage: float | None = None
+    battery_percent: float | None = None
+    gps_latitude: float | None = None
+    gps_longitude: float | None = None
+    gps_satellites: int | None = None
+    roll_degrees: float | None = None
+    pitch_degrees: float | None = None
+    yaw_degrees: float | None = None
 
 
-class ICECandidatePayload(BaseModel):
-    candidate: dict
-    target: Optional[str] = "drone"
-
-
-class MessageResponse(BaseModel):
-    message: str
-    success: bool = True
+class TelemetryEnvelope(BaseModel):
+    type: str = "telemetry"
+    data: TelemetrySnapshot

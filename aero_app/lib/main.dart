@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // 1. Import Riverpod
-import 'app/app.dart';
+
+import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Force horizontal orientation across the app
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
@@ -13,9 +14,5 @@ void main() async {
   ]);
 
   // 2. Wrap app root in ProviderScope
-  runApp(
-    const ProviderScope(
-      child: AeroMindApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: AeroMindApp()));
 }

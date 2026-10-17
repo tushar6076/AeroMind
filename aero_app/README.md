@@ -1,17 +1,35 @@
-# aero_app
+# AeroMind GCS
 
-A new Flutter project.
+The Flutter ground-control app connects to Aero Cloud on the local edge computer.
+Configure the backend URL and access token in **Link Details**; the URL can also
+be supplied at build time with `AERO_CLOUD_URL` and `AERO_API_TOKEN`.
+For a Flutter app running on a phone, use the edge computer's LAN IP, such as
+`http://192.168.1.20:8100`; `localhost` on the phone points back to the phone.
+Use `http://localhost:8100` only when the app and backend run on the same
+machine.
 
-## Getting Started
+The mobile builds allow cleartext traffic for local HTTP/WebSocket links. Use a
+trusted private LAN and do not expose the backend port publicly; the access
+token and flight-control traffic are not encrypted by HTTP.
 
-This project is a starting point for a Flutter application.
+## Service flow
 
-A few resources to get you started if this is your first Flutter project:
+- REST provides health/readiness, flight mode, session, arm, and disarm actions.
+- A telemetry WebSocket streams CRSF-derived status to the HUD.
+- WebRTC carries video from the backend's UVC capture input to the app.
+- An authenticated flight-control WebSocket sends normalized virtual-stick
+  input with a heartbeat. Aero Cloud keeps CRSF frames flowing while armed and
+  ends/disarms the session when the control heartbeat or connection is lost.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+The left stick holds throttle at its last position on release and recenters yaw;
+the right stick recenters pitch and roll. Axis/channel direction currently
+follows the common Mode 2/AETR convention (CH1 roll, CH2 pitch, CH3 throttle,
+CH4 yaw). Confirm the flight-controller channel mapping and failsafe behavior
+before enabling arming. Aero Cloud intentionally leaves `ELRS_ARM_CHANNEL`
+unset by default.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Run checks from this directory with `flutter analyze` and `flutter test`.
+
+AI model inventory, stick calibration, failsafe configuration, the media vault,
+and persisted mission debriefs are not currently exposed by Aero Cloud. The UI
+shows these as unavailable or empty instead of displaying sample data.

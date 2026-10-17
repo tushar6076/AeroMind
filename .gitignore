@@ -19,11 +19,17 @@ Thumbs.db
 # Python
 # =========================
 __pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 *.py[cod]
 *$py.class
 .venv/
 venv/
 ENV/
+*.egg-info/
+.coverage
+htmlcov/
 
 # =========================
 # Flutter / Dart
@@ -48,3 +54,5 @@ coverage/
 # Node (if any)
 # =========================
 node_modules/
+
+_DOCS/*
