@@ -55,4 +55,4 @@ coverage/
 # =========================
 node_modules/
 
-_DOCS/*
+_DOCS/

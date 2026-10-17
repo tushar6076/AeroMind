@@ -1,0 +1,43 @@
+schema: aeromind.flight-board/v1
+
+board:
+  manufacturer: DYS
+  model: FC722
+  firmware: Betaflight
+  betaflight_target: null
+  target_verification_required: true
+  mcu: STM32 FC722
+  dimensions_mm: [38, 38]
+  mount_pattern_mm: [30.5, 30.5]
+  mounting_hole_diameter_mm: 4
+  weight_g: 10
+
+sensors:
+  gyro_accelerometer: ICM42688P
+  barometer: BMP280
+  osd: AT7456E
+  blackbox_flash_mb: 16
+
+connectivity:
+  uart_count: 6
+  i2c_pads:
+    - SDA
+    - "SLA (verify board marking; likely SCL)"
+  motor_outputs: 4
+  motor_connector: SH1.0
+  led_controller: true
+  beeper_pad: true
+
+bec:
+  - voltage_v: 3.3
+    current_a: 1
+  - voltage_v: 5
+    current_a: 3
+  - voltage_v: 12
+    current_a: 3
+
+esc_capabilities_from_supplier:
+  bluejay_compatibility: true
+  bidirectional_dshot: true
+  rpm_filtering: true
+  verification_required: true
