@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aero-vision-ai"
 version = "0.1.0"
-description = "ResQVision Level 2 aerial object detection training, evaluation, and ONNX export."
+description = "AeroMind image detection and hierarchical mission model training."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -25,6 +25,7 @@ dev = [
 
 [project.scripts]
 vision = "aero_vision_ai.cli:main"
+vision-missions = "aero_vision_ai.mission_training:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

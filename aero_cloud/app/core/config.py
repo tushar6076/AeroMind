@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
@@ -13,6 +15,9 @@ class Settings(BaseSettings):
     REDIS_FLIGHT_STATE_TTL_SECONDS: int = Field(default=86_400, ge=1)
     REDIS_RECONNECT_INTERVAL_SECONDS: int = Field(default=5, ge=1)
     TELEMETRY_MAX_AGE_SECONDS: int = Field(default=3, ge=1)
+    AI_MODELS_DIR: Path = Path(__file__).resolve().parents[2] / "models"
+    AI_MAX_IMAGE_BYTES: int = Field(default=8 * 1024 * 1024, ge=1)
+    AI_MAX_IMAGE_PIXELS: int = Field(default=20_000_000, ge=1)
     API_PREFIX: str = "/api/v1"
     API_ACCESS_TOKEN: str | None = None
     ELRS_SERIAL_PORT: str | None = None

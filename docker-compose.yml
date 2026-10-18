@@ -23,11 +23,14 @@ services:
     restart: unless-stopped
     env_file:
       - ./aero_cloud/.env
+    volumes:
+      - ./aero_cloud/models:/app/models:ro
     environment:
       HOST: 0.0.0.0
       PORT: 8100
       DEBUG: "false"
       ENVIRONMENT: production
+      AI_MODELS_DIR: /app/models
       # Points to the redis service container within the internal docker network
       REDIS_URL: redis://redis:6379/0
     ports:

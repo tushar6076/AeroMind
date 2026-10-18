@@ -76,14 +76,17 @@ void main() {
         overrides: [
           aiInventoryProvider.overrideWith(
             (ref) async => const AiInventory(
-              mode: 'demo',
+              mode: 'missions',
               note: 'Catalog supplied by the backend.',
+              routerStatus: 'Router unavailable',
               models: [
                 AiModelSummary(
+                  id: 'test',
                   name: 'Test detector',
                   version: 'test',
                   task: 'Object detection',
                   status: 'Ready',
+                  stageCount: 1,
                 ),
               ],
             ),
@@ -95,7 +98,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Catalog supplied by the backend.'), findsOneWidget);
+    expect(find.text('Mission router: Router unavailable'), findsOneWidget);
     expect(find.text('Test detector'), findsOneWidget);
+    expect(find.text('Choose image and analyze'), findsOneWidget);
     expect(find.text('Vision detector'), findsNothing);
   });
 

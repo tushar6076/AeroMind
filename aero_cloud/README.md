@@ -43,7 +43,20 @@ All REST endpoints are under `/api/v1`; OpenAPI docs are at `/docs`.
 | `WS /flight/control/ws` | Authenticated control stream with heartbeat/failsafe behavior |
 | `WS /telemetry/ws` | Live telemetry snapshots |
 | `POST /video/offer` | Authenticated WebRTC offer for configured UVC video |
-| `GET /ai/loadout`, `GET /vault/items` | Explicitly marked backend demo catalogs |
+| `GET /ai/loadout` | Filesystem-discovered AI mission catalog and model readiness |
+| `POST /ai/infer` | Authenticated, bounded JPEG/PNG/WebP upload for hierarchical model inference |
+| `GET /vault/items` | Explicitly marked backend demo media catalog |
+
+The AI catalog reads [`models/`](models/README.md) metadata on each request.
+Adding a category directory with a valid `metadata.json` makes it appear in
+the app after refreshing the loadout; missing weights and invalid metadata are
+reported per mission. The authenticated inference endpoint preprocesses an
+image according to the router and mission metadata, then runs applicable
+TorchScript stages in order. Image size and decoded pixel limits are
+configurable through `AI_MAX_IMAGE_BYTES` and `AI_MAX_IMAGE_PIXELS`. Uploads
+are not persisted. The root `router.pth` and category `.pth` files are
+TorchScript artifacts and are ignored by Git; inference remains unavailable
+until trusted trained weights are placed in the registry.
 
 Control mutations require the configured `API_ACCESS_TOKEN`. Hardware readiness
 does not become true just because the API is responding. See the

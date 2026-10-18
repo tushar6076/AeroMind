@@ -44,6 +44,7 @@ dependencies:
   intl: ^0.20.3
   flutter_riverpod: ^3.4.3
   state_notifier: ^1.0.0
+  image_picker: ^1.2.4
 
 dev_dependencies:
   flutter_test:

@@ -20,7 +20,7 @@ Redis (same local Compose network)
     `-- latest telemetry cache and expiring flight-session metadata
 
 Aero AI workspaces
-    `-- model training/export; not yet wired to live Aero Cloud inference
+    `-- hierarchical model training/export to the Aero Cloud registry
 ```
 
 The board-specific profile in [`aero_flight/`](aero_flight/README.md) is the
@@ -38,7 +38,7 @@ flight-ready status should be treated as verified hardware configuration.
 | [`aero_app/`](aero_app/README.md) | Flutter ground-control UI | Connects to Aero Cloud; hardware-dependent controls remain readiness-gated |
 | [`aero_cloud/`](aero_cloud/README.md) | FastAPI edge API, CRSF bridge, video signaling, Redis state | Runnable software service; hardware behavior still needs bench validation |
 | [`aero_flight/`](aero_flight/README.md) | Board profile and future companion/controller integration boundaries | Documentation scaffold; no parallel FC firmware implementation |
-| [`aero_ai/`](aero_ai/README.md) | Vision and autonomy model workspaces | Training/export workspaces, not live inference services |
+| [`aero_ai/`](aero_ai/README.md) | Vision and autonomy model workspaces | Trains hierarchical image missions into the Aero Cloud model registry; no live inference yet |
 | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) | Current status, dependency-ordered roadmap, and completion gates | Repository-derived; update as work lands |
 | [`docker-compose.yml`](docker-compose.yml) | Local API and Redis services | Hardware-independent default |
 | [`docker-compose.hardware.yml`](docker-compose.hardware.yml) | Linux edge-device hardware passthrough | Optional override; requires real device paths |
@@ -177,8 +177,14 @@ proof that the aircraft is safe to arm or fly.
 - Current control/session authority and live telemetry subscriptions remain
   process-local. The API is intended to run as a **single worker**; Redis
   Pub/Sub is not yet consumed to coordinate multiple API workers.
-- Edge AI and Recon Vault endpoints currently provide explicitly marked demo
-  catalog data. They do not perform inference or store real media.
+- Edge AI discovers mission metadata from `aero_cloud/models/`; the
+  `vision-missions` training command writes its router, stage weights, and
+  manifests there by default. The authenticated `POST /api/v1/ai/infer`
+  endpoint runs hierarchical TorchScript inference when trusted trained weights
+  are installed. The Flutter AI Loadout screen can select and submit an image.
+  No trained weights are checked in, so the endpoint reports unavailable until
+  weights are deployed. Recon Vault remains an explicitly marked demo catalog
+  and does not store real media.
 - Mission persistence, user accounts, durable flight history, cross-worker
   control coordination, and production TLS are not yet implemented.
 

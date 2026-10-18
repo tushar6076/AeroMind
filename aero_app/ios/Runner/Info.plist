@@ -29,6 +29,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>AeroMind lets you select an image to analyze with the configured edge AI models.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>AeroMind connects to Aero Cloud on your local edge computer for telemetry, video, and flight control.</string>
 	<key>LSRequiresIPhoneOS</key>

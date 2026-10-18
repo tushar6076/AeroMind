@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -42,6 +43,21 @@ class AeroCloudClient {
   Future<AiInventory> getAiInventory() async {
     final json = await _get(ApiEndpoints.aiLoadout);
     return AiInventory.fromJson(json);
+  }
+
+  Future<AiInferenceResult> inferImage(
+    Uint8List imageBytes, {
+    required String contentType,
+  }) async {
+    final json = await _send(
+      'POST',
+      ApiEndpoints.aiInfer,
+      rawBody: imageBytes,
+      contentType: contentType,
+      authenticated: true,
+      timeout: const Duration(minutes: 2),
+    );
+    return AiInferenceResult.fromJson(json);
   }
 
   Future<VaultInventory> getVaultInventory() async {
@@ -147,12 +163,19 @@ class AeroCloudClient {
     String method,
     String path, {
     Map<String, Object?>? body,
+    List<int>? rawBody,
+    String? contentType,
     bool authenticated = false,
     bool expectBody = true,
+    Duration? timeout,
   }) async {
     final configured = _requireConnection();
     final headers = <String, String>{'Accept': 'application/json'};
-    if (body != null) headers['Content-Type'] = 'application/json';
+    if (contentType != null) {
+      headers['Content-Type'] = contentType;
+    } else if (body != null) {
+      headers['Content-Type'] = 'application/json';
+    }
     if (authenticated) {
       final token = configured.accessToken;
       if (token == null || token.isEmpty) {
@@ -170,15 +193,19 @@ class AeroCloudClient {
         'GET' =>
           await _client
               .get(uri, headers: headers)
-              .timeout(DefaultConfigs.requestTimeout),
+              .timeout(timeout ?? DefaultConfigs.requestTimeout),
         'POST' =>
           await _client
-              .post(uri, headers: headers, body: jsonEncode(body))
-              .timeout(DefaultConfigs.requestTimeout),
+              .post(
+                uri,
+                headers: headers,
+                body: rawBody ?? (body == null ? null : jsonEncode(body)),
+              )
+              .timeout(timeout ?? DefaultConfigs.requestTimeout),
         'DELETE' =>
           await _client
               .delete(uri, headers: headers)
-              .timeout(DefaultConfigs.requestTimeout),
+              .timeout(timeout ?? DefaultConfigs.requestTimeout),
         _ => throw StateError('Unsupported HTTP method: $method'),
       };
     } on TimeoutException {

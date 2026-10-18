@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "human",
+  "name": "Human",
+  "version": "1",
+  "description": "Hierarchical person and clothing classification mission.",
+  "task": "Person attributes and clothing",
+  "router_label": "human",
+  "input": {
+    "tensor_shape": [1, 3, 224, 224],
+    "color_order": "RGB",
+    "value_range": [0.0, 1.0]
+  },
+  "stages": [
+    {
+      "id": "person_attributes",
+      "name": "Person attributes",
+      "artifact": "person_attributes.pth",
+      "task": "Person attribute classification",
+      "labels": ["adult_female", "adult_male", "child", "unknown"]
+    },
+    {
+      "id": "clothing",
+      "name": "Clothing",
+      "artifact": "clothing.pth",
+      "task": "Clothing classification",
+      "labels": ["upper_body", "lower_body", "outerwear", "unknown"],
+      "when": {
+        "person_attributes": ["adult_female", "adult_male", "child"]
+      }
+    }
+  ]
+}

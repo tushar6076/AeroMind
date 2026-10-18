@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "vehicle",
+  "name": "Vehicle",
+  "version": "1",
+  "description": "Hierarchical vehicle classification mission.",
+  "task": "Vehicle and detail classification",
+  "router_label": "vehicle",
+  "input": {
+    "tensor_shape": [1, 3, 224, 224],
+    "color_order": "RGB",
+    "value_range": [0.0, 1.0]
+  },
+  "stages": [
+    {
+      "id": "vehicle_type",
+      "name": "Vehicle type",
+      "artifact": "vehicle_type.pth",
+      "task": "Vehicle classification",
+      "labels": ["car", "truck", "motorcycle", "bicycle", "other"]
+    },
+    {
+      "id": "vehicle_details",
+      "name": "Vehicle details",
+      "artifact": "vehicle_details.pth",
+      "task": "Vehicle detail classification",
+      "labels": ["color", "markings", "unknown"],
+      "when": {
+        "vehicle_type": ["car", "truck", "motorcycle", "bicycle"]
+      }
+    }
+  ]
+}

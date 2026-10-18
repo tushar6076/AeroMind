@@ -38,8 +38,11 @@ flutter test
 flutter run
 ```
 
-The AI Loadout and Recon Vault screens read their inventory from Aero Cloud.
-Those endpoints currently return clearly labeled demo data; they do not
-represent live inference or saved media. Stick calibration, failsafe
-configuration, persisted missions, and multi-user accounts are not currently
-exposed by the backend.
+The AI Loadout screen reads its mission inventory from Aero Cloud and can send
+a selected JPEG, PNG, or WebP image to the authenticated inference endpoint.
+Inference requires trained TorchScript weights installed in the backend model
+registry; none are included in Git, so inference reports unavailable until the
+weights are deployed. Recon Vault remains a clearly labeled demo catalog and
+does not store real media. Stick calibration, failsafe configuration,
+persisted missions, and multi-user accounts are not currently exposed by the
+backend.

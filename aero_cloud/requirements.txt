@@ -3,6 +3,8 @@ fastapi[all]>=0.110.0
 pydantic-settings>=2.2.1
 pydantic[email]>=2.6.0
 python-multipart>=0.0.9
+Pillow>=9.5.0
+torch>=2.0.0
 
 # --- Database ---
 sqlalchemy[asyncio]>=2.0.27

@@ -1,0 +1,57 @@
+registry_dir: ../../aero_cloud/models
+input_size: 224
+
+training:
+  epochs: 10
+  batch_size: 16
+  num_workers: 0
+  learning_rate: 0.001
+  seed: 42
+
+router:
+  dataset_dir: data/missions/router
+
+missions:
+  human:
+    name: Human
+    version: "1"
+    description: Hierarchical person and clothing classification mission.
+    task: Person attributes and clothing
+    router_label: human
+    stages:
+      - id: person_attributes
+        name: Person attributes
+        task: Person attribute classification
+        labels: [adult_female, adult_male, child, unknown]
+        train_dir: data/missions/human/person_attributes/train
+        val_dir: data/missions/human/person_attributes/val
+      - id: clothing
+        name: Clothing
+        task: Clothing classification
+        labels: [upper_body, lower_body, outerwear, unknown]
+        train_dir: data/missions/human/clothing/train
+        val_dir: data/missions/human/clothing/val
+        when:
+          person_attributes: [adult_female, adult_male, child]
+
+  vehicle:
+    name: Vehicle
+    version: "1"
+    description: Hierarchical vehicle classification mission.
+    task: Vehicle and detail classification
+    router_label: vehicle
+    stages:
+      - id: vehicle_type
+        name: Vehicle type
+        task: Vehicle classification
+        labels: [car, truck, motorcycle, bicycle, other]
+        train_dir: data/missions/vehicle/vehicle_type/train
+        val_dir: data/missions/vehicle/vehicle_type/val
+      - id: vehicle_details
+        name: Vehicle details
+        task: Vehicle detail classification
+        labels: [color, markings, unknown]
+        train_dir: data/missions/vehicle/vehicle_details/train
+        val_dir: data/missions/vehicle/vehicle_details/val
+        when:
+          vehicle_type: [car, truck, motorcycle, bicycle]

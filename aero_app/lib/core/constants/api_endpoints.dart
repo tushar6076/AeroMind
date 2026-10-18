@@ -12,5 +12,6 @@ abstract final class ApiEndpoints {
   static const telemetrySocket = '$apiPrefix/telemetry/ws';
   static const videoOffer = '$apiPrefix/video/offer';
   static const aiLoadout = '$apiPrefix/ai/loadout';
+  static const aiInfer = '$apiPrefix/ai/infer';
   static const vaultItems = '$apiPrefix/vault/items';
 }

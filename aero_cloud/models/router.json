@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "artifact": "router.pth",
+  "runtime": "torchscript",
+  "input": {
+    "tensor_shape": [1, 3, 224, 224],
+    "color_order": "RGB",
+    "value_range": [0.0, 1.0]
+  },
+  "labels": ["human", "vehicle"],
+  "missions": {
+    "human": "human",
+    "vehicle": "vehicle"
+  }
+}

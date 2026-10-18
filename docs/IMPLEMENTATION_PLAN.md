@@ -27,11 +27,11 @@ specification or a claim that hardware has been tested.
 | Area | Status | Evidence / limitation |
 | --- | --- | --- |
 | API and Flutter connection | Implemented | Link Details, health/readiness, flight routes, telemetry/control sockets |
-| Backend demo catalogs | Implemented | `/api/v1/ai/loadout` and `/api/v1/vault/items`; not live inference or media |
+| Backend catalogs | Partially implemented | `/api/v1/ai/loadout` discovers model mission metadata; `/api/v1/vault/items` remains demo media; no live inference or media |
 | Redis short-lived state | Partially implemented | TTL cache and publications exist; no Pub/Sub consumer or cross-worker session ownership |
 | Hardware profile | Documented, unverified | DYS FC722 / Betaflight profile; exact revision, target and wiring must be confirmed |
 | Video and CRSF hardware | Software path implemented, not bench-verified | Requires real Linux devices and actual receiver/camera setup |
-| AI and media production path | Not implemented | Model registry/inference and real media persistence remain future work |
+| AI and media production path | Partially implemented | Filesystem model metadata discovery exists; TorchScript inference and real media persistence remain future work |
 | Production transport/security | Not production-ready | Plain HTTP on trusted LAN only; no production TLS or distributed control |
 
 ## Execution phases
@@ -119,20 +119,24 @@ flight-test checklist. Automated readiness passing alone is not approval to fly.
 
 ### Phase 4 — Replace demo AI/media catalogs with real backend capabilities
 
-**Status: not implemented.**
+**Status: model mission discovery and bounded image inference implemented;
+real media storage is not.**
 
-1. [ ] Define versioned model metadata and inference request/result contracts.
-2. [ ] Implement an inference adapter with model health, bounded input, timeout,
-   and explicit unavailable/error states.
-3. [ ] Add tests for model selection, invalid input, inference failure, and
-   stale results.
+1. [x] Define versioned model metadata and TorchScript input/output conventions
+   in `aero_cloud/models/`.
+2. [x] Implement authenticated inference with bounded image input, lazy
+   TorchScript loading, explicit unavailable/error states, and stage conditions.
+3. [x] Add tests for model selection, image validation, inference output, and
+   unavailable model weights.
 4. [ ] Define media ownership, local storage location, retention, and
    delete/export behavior before storing real captures.
 5. [ ] Replace demo endpoints with real inventories only when those services
    exist; keep the UI response-driven and clearly distinguish demo/live state.
 
-**Gate:** end-to-end tests use a controlled model/media fixture and make no
-claims of live inference or persisted media when the backing service is absent.
+**Gate:** controlled model fixtures exercise inference end to end. Production
+image quality, latency, and mission accuracy remain unverified until trained
+weights are provided. The API accepts no claim of persisted media; actual media
+storage remains unimplemented.
 
 ### Phase 5 — Production hardening and operations
 

@@ -14,7 +14,7 @@ async def require_control_access(
     if settings.API_ACCESS_TOKEN is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Set API_ACCESS_TOKEN on the backend before enabling controls.",
+            detail="Set API_ACCESS_TOKEN on the backend before protected operations.",
         )
     if credentials is None or not secrets.compare_digest(
         credentials.credentials,

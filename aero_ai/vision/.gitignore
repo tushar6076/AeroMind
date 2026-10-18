@@ -3,6 +3,8 @@
 /data/raw/images/val/*
 !/data/raw/images/val/.gitkeep
 /data/raw/annotations/*.json
+/data/missions/*
+!/data/missions/.gitkeep
 .venv/
 __pycache__/
 *.py[cod]

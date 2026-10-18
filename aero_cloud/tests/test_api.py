@@ -42,10 +42,66 @@ def test_ai_loadout_is_supplied_by_the_backend(client: TestClient) -> None:
 
     assert response.status_code == 200
     inventory = response.json()
-    assert inventory["mode"] == "demo"
-    assert "inference is not connected" in inventory["note"]
-    assert inventory["models"]
-    assert all(model["version"] == "demo" for model in inventory["models"])
+    assert inventory["mode"] == "missions"
+    assert "discovered from model metadata" in inventory["note"]
+    assert inventory["router_status"] == "Router weights are missing"
+    assert {model["id"] for model in inventory["models"]} == {"human", "vehicle"}
+    assert all("weights" in model["status"] for model in inventory["models"])
+
+
+def test_ai_inference_requires_the_access_token(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/ai/infer",
+        content=b"image",
+        headers={"Content-Type": "image/png"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_ai_inference_rejects_unsupported_media_type(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/ai/infer",
+        content=b"not an image",
+        headers={
+            "Authorization": "Bearer test-token",
+            "Content-Type": "text/plain",
+        },
+    )
+
+    assert response.status_code == 415
+
+
+def test_ai_inference_rejects_oversized_image(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "AI_MAX_IMAGE_BYTES", 4)
+
+    response = client.post(
+        "/api/v1/ai/infer",
+        content=b"12345",
+        headers={
+            "Authorization": "Bearer test-token",
+            "Content-Type": "image/png",
+        },
+    )
+
+    assert response.status_code == 413
+
+
+def test_ai_inference_reports_missing_model_weights(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/ai/infer",
+        content=b"image",
+        headers={
+            "Authorization": "Bearer test-token",
+            "Content-Type": "image/png",
+        },
+    )
+
+    assert response.status_code == 503
+    assert "router weights are missing" in response.json()["detail"].lower()
 
 
 def test_vault_items_are_supplied_by_the_backend(client: TestClient) -> None:

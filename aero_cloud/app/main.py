@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import router
 from app.core.config import settings
 from app.services.flight.manager import FlightService
+from app.services.ai.manager import AIService
 from app.services.redis.store import RedisStore
 from app.services.system import SystemService
 from app.services.video import VideoService
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
         app.state.redis_store = redis_store
         app.state.flight_service = flight_service
         app.state.video_service = video_service
+        app.state.ai_service = AIService()
         app.state.system_service = SystemService(flight_service, video_service)
         await redis_store.start()
         try:
