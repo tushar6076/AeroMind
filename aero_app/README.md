@@ -10,7 +10,8 @@ machine.
 
 The mobile builds allow cleartext traffic for local HTTP/WebSocket links. Use a
 trusted private LAN and do not expose the backend port publicly; the access
-token and flight-control traffic are not encrypted by HTTP.
+token and flight-control traffic are not encrypted by HTTP. For the full
+software and edge setup, see the [repository guide](../README.md).
 
 ## Service flow
 
@@ -28,8 +29,17 @@ CH4 yaw). Confirm the flight-controller channel mapping and failsafe behavior
 before enabling arming. Aero Cloud intentionally leaves `ELRS_ARM_CHANNEL`
 unset by default.
 
-Run checks from this directory with `flutter analyze` and `flutter test`.
+Run and test the app:
 
-AI model inventory, stick calibration, failsafe configuration, the media vault,
-and persisted mission debriefs are not currently exposed by Aero Cloud. The UI
-shows these as unavailable or empty instead of displaying sample data.
+```sh
+flutter pub get
+flutter analyze
+flutter test
+flutter run
+```
+
+The AI Loadout and Recon Vault screens read their inventory from Aero Cloud.
+Those endpoints currently return clearly labeled demo data; they do not
+represent live inference or saved media. Stick calibration, failsafe
+configuration, persisted missions, and multi-user accounts are not currently
+exposed by the backend.

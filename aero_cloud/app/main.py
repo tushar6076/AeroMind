@@ -6,12 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import router
 from app.core.config import settings
 from app.services.flight.manager import FlightService
+from app.services.redis.store import RedisStore
 from app.services.system import SystemService
 from app.services.video import VideoService
 
 
 def create_app() -> FastAPI:
-    flight_service = FlightService()
+    redis_store = RedisStore()
+    flight_service = FlightService(redis_store)
     video_service = VideoService(
         device=settings.VIDEO_INPUT_DEVICE,
         width=settings.VIDEO_WIDTH,
@@ -21,15 +23,22 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        app.state.redis_store = redis_store
         app.state.flight_service = flight_service
         app.state.video_service = video_service
         app.state.system_service = SystemService(flight_service, video_service)
-        await flight_service.start()
+        await redis_store.start()
         try:
+            await flight_service.restore_state()
+            await flight_service.start()
+            await flight_service.persist_state()
             yield
         finally:
-            await video_service.close()
-            await flight_service.close()
+            try:
+                await video_service.close()
+                await flight_service.close()
+            finally:
+                await redis_store.close()
 
     app = FastAPI(
         title=settings.PROJECT_NAME,

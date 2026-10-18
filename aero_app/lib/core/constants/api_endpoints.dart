@@ -11,4 +11,6 @@ abstract final class ApiEndpoints {
   static const flightControlSocket = '$apiPrefix/flight/control/ws';
   static const telemetrySocket = '$apiPrefix/telemetry/ws';
   static const videoOffer = '$apiPrefix/video/offer';
+  static const aiLoadout = '$apiPrefix/ai/loadout';
+  static const vaultItems = '$apiPrefix/vault/items';
 }

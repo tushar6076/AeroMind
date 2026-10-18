@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8100
     DEBUG: bool = False
+    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_TELEMETRY_TTL_SECONDS: int = Field(default=10, ge=1)
+    REDIS_FLIGHT_STATE_TTL_SECONDS: int = Field(default=86_400, ge=1)
+    REDIS_RECONNECT_INTERVAL_SECONDS: int = Field(default=5, ge=1)
+    TELEMETRY_MAX_AGE_SECONDS: int = Field(default=3, ge=1)
     API_PREFIX: str = "/api/v1"
     API_ACCESS_TOKEN: str | None = None
     ELRS_SERIAL_PORT: str | None = None

@@ -1,0 +1,16 @@
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.doc binary
+*.docx binary
+*.jpg binary
+*.jpeg binary
+*.mp4 binary
+*.png binary
+*.webp binary
+*.onnx binary
+*.pt binary
+*.pth binary
+*.tflite binary

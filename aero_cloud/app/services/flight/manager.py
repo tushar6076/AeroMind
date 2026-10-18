@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.schemas.flight import ControlInput, FlightModeName
 from app.schemas.telemetry import TelemetrySnapshot
 from app.services.flight.crsf import CrsfSerialBridge
+from app.services.redis.store import RedisStore
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,8 @@ class Readiness:
 
 
 class FlightService:
-    def __init__(self) -> None:
+    def __init__(self, redis_store: RedisStore | None = None) -> None:
+        self._redis_store = redis_store
         self._bridge = (
             CrsfSerialBridge(settings.ELRS_SERIAL_PORT, settings.ELRS_BAUD_RATE)
             if settings.ELRS_SERIAL_PORT
@@ -50,12 +52,26 @@ class FlightService:
                 logger.warning("Could not open ELRS CRSF bridge: %s", error)
         self._publisher = asyncio.create_task(self._publish_loop())
 
+    async def restore_state(self) -> None:
+        if self._redis_store is None:
+            return
+        state = await self._redis_store.load_flight_state()
+        selected_mode = state.get("selected_mode") if state else None
+        if selected_mode in {
+            "position_hold",
+            "waypoint_patrol",
+            "orbit",
+            "acro",
+        }:
+            self._selected_mode = selected_mode
+
     async def close(self) -> None:
         try:
             await self.disarm()
         except RuntimeError as error:
             logger.error("Could not confirm ELRS disarm during shutdown: %s", error)
         self._session_active = False
+        await self.persist_state()
         if self._publisher is not None:
             self._publisher.cancel()
             try:
@@ -70,7 +86,10 @@ class FlightService:
         if self._bridge is None:
             return TelemetrySnapshot(timestamp=time.time())
         telemetry = self._bridge.telemetry
-        fresh = time.time() - telemetry.received_at < 3
+        fresh = (
+            time.time() - telemetry.received_at
+            < settings.TELEMETRY_MAX_AGE_SECONDS
+        )
         return TelemetrySnapshot(
             timestamp=telemetry.received_at or time.time(),
             link_quality=telemetry.link_quality if fresh else None,
@@ -141,6 +160,19 @@ class FlightService:
             "detail": detail,
         }
 
+    async def persist_state(self) -> None:
+        redis_store = getattr(self, "_redis_store", None)
+        if redis_store is None:
+            return
+        await redis_store.save_flight_state(
+            {
+                "session_active": self._session_active,
+                "armed": self._armed,
+                "selected_mode": self._selected_mode,
+                "updated_at": time.time(),
+            }
+        )
+
     def start_session(self, temperature_c: float | None) -> None:
         if not self.readiness(temperature_c).ready_for_flight:
             raise RuntimeError("Flight readiness checks have not passed")
@@ -165,25 +197,30 @@ class FlightService:
         self._control = ControlInput(roll=0, pitch=0, yaw=0, throttle=0)
         self._last_control_at = time.monotonic()
         self._control_task = asyncio.create_task(self._control_loop())
+        await self.persist_state()
 
     async def disarm(self) -> None:
         if not self._armed:
             return
         self._armed = False
         await self._stop_control_loop()
-        if self._bridge is None or not self._bridge.connected:
-            raise RuntimeError("ELRS link unavailable; disarm command was not sent")
-        await self._send_control_frame(
-            ControlInput(roll=0, pitch=0, yaw=0, throttle=0),
-            armed=False,
-        )
-        self._control = ControlInput(roll=0, pitch=0, yaw=0, throttle=0)
+        try:
+            if self._bridge is None or not self._bridge.connected:
+                raise RuntimeError("ELRS link unavailable; disarm command was not sent")
+            await self._send_control_frame(
+                ControlInput(roll=0, pitch=0, yaw=0, throttle=0),
+                armed=False,
+            )
+            self._control = ControlInput(roll=0, pitch=0, yaw=0, throttle=0)
+        finally:
+            await self.persist_state()
 
     async def end_session(self) -> None:
         try:
             await self.disarm()
         finally:
             self._session_active = False
+            await self.persist_state()
 
     async def send_control(self, control: ControlInput) -> None:
         if not self._session_active or not self._armed:
@@ -265,6 +302,8 @@ class FlightService:
         while True:
             await asyncio.sleep(0.1)
             snapshot = self.current_telemetry()
+            if self._redis_store is not None:
+                await self._redis_store.save_telemetry(snapshot.model_dump())
             for listener in tuple(self._telemetry_listeners):
                 if listener.full():
                     listener.get_nowait()

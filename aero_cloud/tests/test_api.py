@@ -37,6 +37,31 @@ def test_system_health_reports_unconfigured_hardware(client: TestClient) -> None
     assert checks["Battery"] == "Battery telemetry is unavailable."
 
 
+def test_ai_loadout_is_supplied_by_the_backend(client: TestClient) -> None:
+    response = client.get("/api/v1/ai/loadout")
+
+    assert response.status_code == 200
+    inventory = response.json()
+    assert inventory["mode"] == "demo"
+    assert "inference is not connected" in inventory["note"]
+    assert inventory["models"]
+    assert all(model["version"] == "demo" for model in inventory["models"])
+
+
+def test_vault_items_are_supplied_by_the_backend(client: TestClient) -> None:
+    response = client.get("/api/v1/vault/items")
+
+    assert response.status_code == 200
+    inventory = response.json()
+    assert inventory["mode"] == "demo"
+    assert "no media files are stored" in inventory["note"]
+    assert {item["media_type"] for item in inventory["items"]} == {
+        "image",
+        "video",
+    }
+    assert all(item["captured_at"] is None for item in inventory["items"])
+
+
 def test_session_cannot_start_without_readiness(client: TestClient) -> None:
     response = client.post(
         "/api/v1/flight/session",

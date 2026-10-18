@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aero_app/app.dart';
+import 'package:aero_app/core/models/backend_catalog.dart';
+import 'package:aero_app/core/providers/catalog_providers.dart';
 import 'package:aero_app/core/services/connection_store.dart';
 import 'package:aero_app/features/edge_ai/presentation/screens/ai_loadout_screen.dart';
 import 'package:aero_app/features/settings/presentation/screens/rig_settings_screen.dart';
+import 'package:aero_app/features/vault/presentation/screens/recon_vault_screen.dart';
 
 class _MemoryConnectionStore implements ConnectionStore {
   @override
@@ -65,13 +68,70 @@ void main() {
     expect(find.text('CLOSE PREVIEW'), findsOneWidget);
   });
 
-  testWidgets('AI loadout does not display a hardcoded model catalog', (
+  testWidgets('AI loadout renders the backend-provided model catalog', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: AiLoadoutScreen()));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          aiInventoryProvider.overrideWith(
+            (ref) async => const AiInventory(
+              mode: 'demo',
+              note: 'Catalog supplied by the backend.',
+              models: [
+                AiModelSummary(
+                  name: 'Test detector',
+                  version: 'test',
+                  task: 'Object detection',
+                  status: 'Ready',
+                ),
+              ],
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: AiLoadoutScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    expect(find.text('AI inventory unavailable'), findsOneWidget);
+    expect(find.text('Catalog supplied by the backend.'), findsOneWidget);
+    expect(find.text('Test detector'), findsOneWidget);
     expect(find.text('Vision detector'), findsNothing);
+  });
+
+  testWidgets('recon vault renders the backend-provided media catalog', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          vaultInventoryProvider.overrideWith(
+            (ref) async => const VaultInventory(
+              mode: 'demo',
+              note: 'Media inventory supplied by the backend.',
+              items: [
+                VaultItem(
+                  id: 'test-image',
+                  title: 'Test image',
+                  mediaType: 'image',
+                  capturedAt: null,
+                  durationSeconds: null,
+                  sizeBytes: null,
+                ),
+              ],
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: ReconVaultScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Media inventory supplied by the backend.'),
+      findsOneWidget,
+    );
+    expect(find.text('Test image'), findsOneWidget);
   });
 
   testWidgets('rig settings expose the backend connection monitor', (

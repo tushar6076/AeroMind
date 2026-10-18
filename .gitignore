@@ -12,8 +12,14 @@ Thumbs.db
 # Environment & Secrets
 # =========================
 .env
+.env.*
+!.env.example
+!**/.env.example
 *.pem
 *.key
+*.p12
+*.pfx
+*.keystore
 
 # =========================
 # Python
@@ -49,10 +55,19 @@ coverage/
 *.log
 *.sqlite3
 *.db
+*.dump
+*.core
 
 # =========================
 # Node (if any)
 # =========================
 node_modules/
 
+# =========================
+# Local hardware captures
+# =========================
+aero_flight/logs/
+aero_flight/captures/
+
+# Archived source documents are intentionally kept outside version control.
 _DOCS/

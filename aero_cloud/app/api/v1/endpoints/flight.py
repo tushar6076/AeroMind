@@ -41,6 +41,7 @@ async def select_flight_mode(
 ) -> FlightStatus:
     service = _service(request)
     service.set_mode(selection.mode)
+    await service.persist_state()
     return service.status(_temperature(request))
 
 
@@ -66,6 +67,7 @@ async def start_flight_session(request: Request) -> FlightStatus:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(error)
         ) from error
+    await service.persist_state()
     return service.status(health.companion_temperature_c)
 
 

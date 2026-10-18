@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import '../constants/api_endpoints.dart';
 import '../constants/default_configs.dart';
+import '../models/backend_catalog.dart';
 import '../models/backend_status.dart';
 import '../services/backend_connection.dart';
 
@@ -36,6 +37,16 @@ class AeroCloudClient {
   Future<FlightStatus> getFlightStatus() async {
     final json = await _get(ApiEndpoints.flightStatus);
     return FlightStatus.fromJson(json);
+  }
+
+  Future<AiInventory> getAiInventory() async {
+    final json = await _get(ApiEndpoints.aiLoadout);
+    return AiInventory.fromJson(json);
+  }
+
+  Future<VaultInventory> getVaultInventory() async {
+    final json = await _get(ApiEndpoints.vaultItems);
+    return VaultInventory.fromJson(json);
   }
 
   Future<FlightStatus> selectFlightMode(String mode) async {

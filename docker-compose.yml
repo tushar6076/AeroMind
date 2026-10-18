@@ -1,8 +1,26 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: aeromind_redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - aeromind_net
+
   api:
     build:
       context: ./aero_cloud
       dockerfile: Dockerfile
+    container_name: aeromind_api
+    restart: unless-stopped
     env_file:
       - ./aero_cloud/.env
     environment:
@@ -10,8 +28,13 @@ services:
       PORT: 8100
       DEBUG: "false"
       ENVIRONMENT: production
+      # Points to the redis service container within the internal docker network
+      REDIS_URL: redis://redis:6379/0
     ports:
       - "8100:8100"
+    depends_on:
+      redis:
+        condition: service_healthy
     healthcheck:
       test:
         - CMD
@@ -22,4 +45,13 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 3
-    restart: unless-stopped
+    networks:
+      - aeromind_net
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  aeromind_net:
+    driver: bridge

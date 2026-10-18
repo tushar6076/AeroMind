@@ -1,4 +1,15 @@
 services:
   api:
+    # Grants the non-root container user access to the host's video and dialout (serial) groups
+    group_add:
+      - video
+      - dialout
     devices:
-      - "/dev/video0:/dev/video0"
+      # UVC receiver / HDMI capture device
+      # VIDEO_HOST_DEVICE is a host-side Compose variable. The API sees /dev/video0.
+      - "${VIDEO_HOST_DEVICE:-/dev/video0}:/dev/video0"
+      # ELRS / CRSF serial transmitter (if configured)
+      # - "${ELRS_SERIAL_PORT:-/dev/ttyUSB0}:${ELRS_SERIAL_PORT:-/dev/ttyUSB0}"
+    volumes:
+      # Host thermal monitoring path (read-only)
+      - "${HOST_THERMAL_HOST_PATH:-/sys/class/thermal/thermal_zone0/temp}:/sys/class/thermal/thermal_zone0/temp:ro"

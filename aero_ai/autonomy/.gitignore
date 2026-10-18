@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+/data/raw/*
+!/data/raw/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/checkpoints/*
+!/checkpoints/.gitkeep
+/artifacts/*
+!/artifacts/.gitkeep
+*.onnx
+*.tflite
+*.pth
+*.pt
