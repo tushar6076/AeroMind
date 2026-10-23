@@ -18,32 +18,49 @@ class LobbyScreen extends StatelessWidget {
       showBackButton: false,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 820;
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    const TopStatusDock(),
-                    OutlinedButton.icon(
-                      onPressed: () => ConnectionOverlay.show(context),
-                      icon: const Icon(Icons.settings_ethernet, size: 16),
-                      label: const Text('LINK DETAILS'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                if (isWide)
-                  SizedBox(
-                    height: 390,
-                    child: Row(
+          final isShort = constraints.maxHeight < 340;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  const TopStatusDock(),
+                  OutlinedButton.icon(
+                    onPressed: () => ConnectionOverlay.show(context),
+                    icon: const Icon(Icons.settings_ethernet, size: 16),
+                    label: const Text('LINK DETAILS'),
+                  ),
+                ],
+              ),
+              SizedBox(height: isShort ? 10 : 16),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, mainConstraints) {
+                    final compactDocks =
+                        constraints.maxWidth < 680 ||
+                        mainConstraints.maxHeight < 132;
+                    final gap = compactDocks ? 8.0 : 12.0;
+                    final dockWidth = compactDocks
+                        ? 56.0
+                        : ((constraints.maxWidth - 324) / 2)
+                              .clamp(160.0, 190.0)
+                              .toDouble();
+                    final buttonSize = compactDocks
+                        ? ((mainConstraints.maxHeight - gap) / 2)
+                              .clamp(36.0, 56.0)
+                              .toDouble()
+                        : 56.0;
+
+                    return Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _NavigationDock(
+                          width: dockWidth,
+                          compact: compactDocks,
+                          buttonSize: buttonSize,
                           firstTitle: 'Flight modes',
                           firstSubtitle: 'Operational profile',
                           firstIcon: Icons.explore,
@@ -53,90 +70,27 @@ class LobbyScreen extends StatelessWidget {
                           secondIcon: Icons.memory,
                           secondTap: () => _push(context, AppRoutes.edgeAi),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: gap),
                         const Expanded(child: _AircraftPanel()),
-                        const SizedBox(width: 16),
+                        SizedBox(width: gap),
                         _NavigationDock.media(
+                          width: dockWidth,
+                          compact: compactDocks,
+                          buttonSize: buttonSize,
                           firstTap: () => _push(context, AppRoutes.vault),
                           secondTap: () => _push(context, AppRoutes.settings),
                         ),
                       ],
-                    ),
-                  )
-                else ...[
-                  const SizedBox(height: 240, child: _AircraftPanel()),
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      TacticalDockButton(
-                        title: 'Flight modes',
-                        subtitle: 'Operational profile',
-                        icon: Icons.explore,
-                        onTap: () => _push(context, AppRoutes.flightModes),
-                      ),
-                      TacticalDockButton(
-                        title: 'Edge AI',
-                        subtitle: 'Model loadout',
-                        icon: Icons.memory,
-                        onTap: () => _push(context, AppRoutes.edgeAi),
-                      ),
-                      TacticalDockButton(
-                        title: 'Recon vault',
-                        subtitle: 'Local media',
-                        icon: Icons.video_library_outlined,
-                        onTap: () => _push(context, AppRoutes.vault),
-                      ),
-                      TacticalDockButton(
-                        title: 'Rig settings',
-                        subtitle: 'Hardware & controls',
-                        icon: Icons.tune,
-                        onTap: () => _push(context, AppRoutes.settings),
-                      ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 18),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'FLIGHT OPERATIONS',
-                                style: TextStyle(
-                                  color: TacticalColors.accent,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              SizedBox(height: 7),
-                              Text(
-                                'Run pre-flight checks before entering the HUD.',
-                                style: TextStyle(color: TacticalColors.muted),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        TacticalButton(
-                          label: 'DEPLOY',
-                          icon: Icons.rocket_launch,
-                          onPressed: () =>
-                              _push(context, AppRoutes.flightModes),
-                        ),
-                      ],
-                    ),
-                  ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: isShort ? 10 : 16),
+              _FlightOperationsPanel(
+                compact: isShort,
+                onDeploy: () => _push(context, AppRoutes.flightModes),
+              ),
+            ],
           );
         },
       ),
@@ -150,6 +104,9 @@ class LobbyScreen extends StatelessWidget {
 
 class _NavigationDock extends StatelessWidget {
   const _NavigationDock({
+    required this.width,
+    required this.compact,
+    required this.buttonSize,
     required this.firstTitle,
     required this.firstSubtitle,
     required this.firstIcon,
@@ -160,14 +117,22 @@ class _NavigationDock extends StatelessWidget {
     required this.secondTap,
   });
 
-  const _NavigationDock.media({required this.firstTap, required this.secondTap})
-    : firstTitle = 'Recon vault',
-      firstSubtitle = 'Local media',
-      firstIcon = Icons.video_library_outlined,
-      secondTitle = 'Rig settings',
-      secondSubtitle = 'Hardware & controls',
-      secondIcon = Icons.tune;
+  const _NavigationDock.media({
+    required this.width,
+    required this.compact,
+    required this.buttonSize,
+    required this.firstTap,
+    required this.secondTap,
+  }) : firstTitle = 'Recon vault',
+       firstSubtitle = 'Local media',
+       firstIcon = Icons.video_library_outlined,
+       secondTitle = 'Rig settings',
+       secondSubtitle = 'Hardware & controls',
+       secondIcon = Icons.tune;
 
+  final double width;
+  final bool compact;
+  final double buttonSize;
   final String firstTitle;
   final String firstSubtitle;
   final IconData firstIcon;
@@ -180,7 +145,7 @@ class _NavigationDock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 190,
+      width: width,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -189,13 +154,19 @@ class _NavigationDock extends StatelessWidget {
             subtitle: firstSubtitle,
             icon: firstIcon,
             onTap: firstTap,
+            width: width,
+            compact: compact,
+            compactSize: buttonSize,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: compact ? 8 : 12),
           TacticalDockButton(
             title: secondTitle,
             subtitle: secondSubtitle,
             icon: secondIcon,
             onTap: secondTap,
+            width: width,
+            compact: compact,
+            compactSize: buttonSize,
           ),
         ],
       ),
@@ -218,20 +189,30 @@ class _AircraftPanel extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           const Positioned.fill(child: CustomPaint(painter: _GridPainter())),
-          Container(
-            width: 220,
-            height: 220,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: TacticalColors.accent.withValues(alpha: 0.25),
-              ),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final extent = constraints.biggest.shortestSide;
+              return Container(
+                width: extent * 0.68,
+                height: extent * 0.68,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: TacticalColors.accent.withValues(alpha: 0.25),
+                  ),
+                ),
+              );
+            },
           ),
-          const Icon(
-            Icons.airplanemode_active,
-            size: 114,
-            color: TacticalColors.accent,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final planeSize = constraints.biggest.shortestSide * 0.4;
+              return Icon(
+                Icons.airplanemode_active,
+                size: planeSize,
+                color: TacticalColors.accent,
+              );
+            },
           ),
           const Positioned(
             left: 18,
@@ -244,6 +225,59 @@ class _AircraftPanel extends StatelessWidget {
             child: _PanelTag(label: 'ACTIVE PROFILE', value: 'NOT SELECTED'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FlightOperationsPanel extends StatelessWidget {
+  const _FlightOperationsPanel({required this.compact, required this.onDeploy});
+
+  final bool compact;
+  final VoidCallback onDeploy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 12 : 18,
+          vertical: compact ? 8 : 14,
+        ),
+        child: Row(
+          children: [
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'FLIGHT OPERATIONS',
+                    style: TextStyle(
+                      color: TacticalColors.accent,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    'Run pre-flight checks before entering the HUD.',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: TacticalColors.muted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            TacticalButton(
+              label: 'DEPLOY',
+              icon: Icons.rocket_launch,
+              onPressed: onDeploy,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -96,36 +96,43 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: TacticalColors.surface,
-        border: Border.all(color: TacticalColors.outline),
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 15),
-          const SizedBox(width: 7),
-          Text(
-            '$label  ',
-            style: const TextStyle(
-              color: TacticalColors.muted,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
+    return SizedBox(
+      width: 164,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: TacticalColors.surface,
+          border: Border.all(color: TacticalColors.outline),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 15),
+            const SizedBox(width: 7),
+            Text(
+              '$label  ',
+              maxLines: 1,
+              style: const TextStyle(
+                color: TacticalColors.muted,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.6,
+            Expanded(
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.6,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

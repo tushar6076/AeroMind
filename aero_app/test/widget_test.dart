@@ -68,6 +68,68 @@ void main() {
     expect(find.text('CLOSE PREVIEW'), findsOneWidget);
   });
 
+  testWidgets('lobby docks stay beside the aircraft without scrolling', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(720, 500);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          connectionStoreProvider.overrideWithValue(_MemoryConnectionStore()),
+        ],
+        child: const AeroMindApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    final aircraft = tester.getRect(find.byIcon(Icons.airplanemode_active));
+    expect(
+      tester.getRect(find.text('FLIGHT MODES')).center.dx,
+      lessThan(aircraft.center.dx),
+    );
+    expect(
+      tester.getRect(find.text('RECON VAULT')).center.dx,
+      greaterThan(aircraft.center.dx),
+    );
+    expect(tester.takeException(), isNull);
+
+    tester.view.physicalSize = const Size(640, 360);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          connectionStoreProvider.overrideWithValue(_MemoryConnectionStore()),
+        ],
+        child: const AeroMindApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    final compactAircraft = tester.getRect(
+      find.byIcon(Icons.airplanemode_active),
+    );
+    expect(
+      tester
+          .getRect(find.byTooltip('Flight modes · Operational profile'))
+          .center
+          .dx,
+      lessThan(compactAircraft.center.dx),
+    );
+    expect(
+      tester.getRect(find.byTooltip('Recon vault · Local media')).center.dx,
+      greaterThan(compactAircraft.center.dx),
+    );
+    await tester.tap(find.byTooltip('Flight modes · Operational profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Flight Mode Hub'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('AI loadout renders the backend-provided model catalog', (
     WidgetTester tester,
   ) async {

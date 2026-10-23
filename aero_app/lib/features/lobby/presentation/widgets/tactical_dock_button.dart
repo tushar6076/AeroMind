@@ -9,6 +9,9 @@ class TacticalDockButton extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.onTap,
+    this.width = 190,
+    this.compact = false,
+    this.compactSize = 56,
     super.key,
   });
 
@@ -16,9 +19,35 @@ class TacticalDockButton extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
+  final double width;
+  final bool compact;
+  final double compactSize;
 
   @override
   Widget build(BuildContext context) {
+    if (compact) {
+      return Tooltip(
+        message: '$title · $subtitle',
+        child: Material(
+          color: TacticalColors.surface,
+          borderRadius: TacticalShapes.panelRadius,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: TacticalShapes.panelRadius,
+            child: Container(
+              width: compactSize,
+              height: compactSize,
+              decoration: BoxDecoration(
+                borderRadius: TacticalShapes.panelRadius,
+                border: Border.all(color: TacticalColors.outline),
+              ),
+              child: Icon(icon, color: TacticalColors.accent, size: 22),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Material(
       color: TacticalColors.surface,
       borderRadius: TacticalShapes.panelRadius,
@@ -26,7 +55,7 @@ class TacticalDockButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: TacticalShapes.panelRadius,
         child: Container(
-          width: 190,
+          width: width,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: TacticalShapes.panelRadius,

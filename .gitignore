@@ -69,6 +69,3 @@ node_modules/
 aero_flight/logs/
 aero_flight/captures/
 aero_cloud/models/**/*.pth
-
-# Archived source documents are intentionally kept outside version control.
-_DOCS/
